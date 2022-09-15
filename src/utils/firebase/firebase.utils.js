@@ -1,6 +1,13 @@
-import { initializeApp } from "firebase/app"
-import { getAuth, signInWithPopup, signInWithRedirect, GoogleAuthProvider } from "firebase/auth"
-import { getFirestore, doc, getDoc, setDoc } from "firebase/firestore"
+import { initializeApp } from "firebase/app";
+import {
+    getAuth,
+    signInWithPopup,
+    signInWithRedirect,
+    GoogleAuthProvider,
+    createUserWithEmailAndPassword,
+    signInWithEmailAndPassword,
+} from "firebase/auth";
+import { getFirestore, doc, getDoc, setDoc } from "firebase/firestore";
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
@@ -9,27 +16,30 @@ const firebaseConfig = {
     projectId: "crwn-db-12302",
     storageBucket: "crwn-db-12302.appspot.com",
     messagingSenderId: "85093954989",
-    appId: "1:85093954989:web:e600ecece607f407b05d24"
+    appId: "1:85093954989:web:e600ecece607f407b05d24",
 };
 
 // Initialize Firebase
 const firebaseApp = initializeApp(firebaseConfig);
 
 // Initialize Provider for Google auth
-const provider = new GoogleAuthProvider();
-provider.setCustomParameters({
-    prompt: "select_account"
-})
+const googleProvider = new GoogleAuthProvider();
+googleProvider.setCustomParameters({
+    prompt: "select_account",
+});
 
-export const auth = getAuth()
-export const signInWithGooglePopup = () => signInWithPopup(auth, provider)
+export const auth = getAuth();
+export const signInWithGooglePopup = () =>
+    signInWithPopup(auth, googleProvider);
+export const signInWithGoogleRedirect = () =>
+    signInWithRedirect(auth, googleProvider);
 
-export const db = getFirestore()
+export const db = getFirestore();
 
 export const createUserDocumentFromAuth = async (userAuth) => {
-    const userDocRef = doc(db, 'users', userAuth.uid)
+    const userDocRef = doc(db, "users", userAuth.uid);
     // console.log(userDocRef);
-    const userSnapshot = await getDoc(userDocRef)
+    const userSnapshot = await getDoc(userDocRef);
     // console.log(userSnapshot);
     // console.log(userSnapshot.exists());
     //user data doesn't exists: create / set the document with the data from userAuth in my collection
@@ -40,7 +50,7 @@ export const createUserDocumentFromAuth = async (userAuth) => {
             await setDoc(userDocRef, {
                 displayName,
                 email,
-                createdAt
+                createdAt,
             });
         } catch (error) {
             console.log("error creating the user", error);
@@ -48,5 +58,13 @@ export const createUserDocumentFromAuth = async (userAuth) => {
     }
     //if user data exists
     return userDocRef;
+};
 
-}
+export const createAuthUserWithEmailAndPassword = async (email, password) => {
+    if (!email || !password) return;
+    return await createUserWithEmailAndPassword(auth, email, password);
+};
+export const signInAuthUserWithEmailAndPassword = async (email, password) => {
+    if (!email || !password) return;
+    return await signInWithEmailAndPassword(auth, email, password);
+};
